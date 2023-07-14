@@ -4,6 +4,9 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "wb": "turbo run dev --filter web",
+    "host": "pnpm run dev --filter host",
+    "build:wb": "turbo run build --filter web",
+    "build:host": "turbo run build --filter host",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
