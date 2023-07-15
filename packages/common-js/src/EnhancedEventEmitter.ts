@@ -12,17 +12,23 @@ class EnhancedEventEmitter<E extends Events = Events> {
 
   public on<K extends keyof E>(
     eventName: K,
-    listener: (args: E[K]) => void,
+    listener: (...args: E[K]) => void,
   ): this {
-    this.emitter.on(eventName as string, listener);
+    this.emitter.on(
+      eventName as string,
+      listener as unknown as (...args: unknown[]) => void,
+    );
     return this;
   }
 
   public off<K extends keyof E>(
     eventName: K,
-    listener: (args: E[K]) => void,
+    listener: (...args: E[K]) => void,
   ): this {
-    this.emitter.off(eventName as string, listener);
+    this.emitter.off(
+      eventName as string,
+      listener as unknown as (...args: unknown[]) => void,
+    );
     return this;
   }
 

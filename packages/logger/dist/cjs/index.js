@@ -25,9 +25,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslog = __importStar(require("tslog"));
 class Logger {
-    logger;
-    meta = {};
     constructor(settings, meta) {
+        this.meta = {};
         this.logger = new tslog.Logger({
             type: process.env.NODE_ENV === "production" ? "json" : "pretty",
             minLevel: 3,

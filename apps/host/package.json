@@ -13,11 +13,14 @@
   "license": "ISC",
   "dependencies": {
     "common-js": "workspace:*",
-    "logger": "workspace:*"
+    "logger": "workspace:*",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.31.0",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
+    "@types/uuidv4": "^5.0.0",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.1.6",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "typescript": "^5.1.6"
   }
 }

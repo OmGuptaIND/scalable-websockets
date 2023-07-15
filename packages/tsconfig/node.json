@@ -5,7 +5,7 @@
     "compilerOptions": {
       "lib": ["dom", "esnext.asynciterable", "esnext"],
       "module": "CommonJS",
-      "target": "ESNext"
+      "target": "ES2018"
     },
     "include": ["src"],
     "exclude": ["node_modules"]
