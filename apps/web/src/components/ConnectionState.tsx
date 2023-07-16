@@ -17,7 +17,7 @@ const ConnectionState: React.FC<Props> = ({ className }) => {
 
   const [connectionState, setConnectionState] = useState<
     SocketConnectionState | "UNINITIALIZED"
-  >(nezuko.connectionState as SocketConnectionState | "UNINITIALIZED");
+  >(nezuko.connectionState);
 
   useEffect(() => {
     const handleConnectionStateChange = (data: {
@@ -28,6 +28,7 @@ const ConnectionState: React.FC<Props> = ({ className }) => {
       logger.info({ ws: data.ws });
       toast({
         title: "Connection state changed",
+        duration: 2000,
       });
       setConnectionState(data.state);
     };

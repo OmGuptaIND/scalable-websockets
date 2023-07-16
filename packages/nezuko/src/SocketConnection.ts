@@ -1,7 +1,7 @@
 import { EnhancedEventEmitter } from 'common-js';
 import mainLogger from './logger';
 
-const ENDPOINT = 'http://localhost:5555/ws';
+const ENDPOINT = 'ws://localhost:5555/ws';
 
 const MESSAGE_ENUM = Object.freeze({
   SELF_CONNECTED: 'SELF_CONNECTED',
@@ -13,10 +13,17 @@ const MESSAGE_ENUM = Object.freeze({
 export type SocketConnectionEvents = {
   connectionStateChange: [data: { ws: WebSocket; state: SocketConnectionState }];
   open: [data: { ws: WebSocket }];
-  error: [data: { ws: WebSocket }];
+  'connect-error': [data: { ws: WebSocket }];
   clientConnected: [data: { ws: WebSocket; payload: { id: string } }];
   clientDisconnected: [data: { ws: WebSocket; payload: { id: string } }];
   clientMessage: [data: { ws: WebSocket; payload: { id: string; message: string } }];
+  error: [
+    data: {
+      error: {
+        message: string;
+      };
+    }
+  ];
 };
 
 export type SocketConnectionState = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
@@ -26,6 +33,7 @@ export const socketConnectionReadyState = ['CONNECTING', 'OPEN', 'CLOSING', 'CLO
 const logger = mainLogger.createSubLogger('SocketConnection.ts');
 
 class SocketConnection extends EnhancedEventEmitter<SocketConnectionEvents> {
+  private static __instance: SocketConnection;
   public roomId: string | null = null;
 
   protected _socket: WebSocket;
@@ -33,11 +41,11 @@ class SocketConnection extends EnhancedEventEmitter<SocketConnectionEvents> {
   private __connectionState = 'CONNECTING';
 
   private set connectionState(state: SocketConnectionState) {
-    this.__connectionState = state;
-
     if (this.__connectionState !== state) {
       this.emit('connectionStateChange', { ws: this._socket, state });
     }
+
+    this.__connectionState = state;
   }
 
   public get connectionState() {
@@ -47,10 +55,26 @@ class SocketConnection extends EnhancedEventEmitter<SocketConnectionEvents> {
     return state;
   }
 
-  constructor() {
+  public static init = () => {
+    if (SocketConnection.__instance) return SocketConnection.__instance;
+
+    try {
+      const socket = new WebSocket(ENDPOINT);
+
+      SocketConnection.__instance = new SocketConnection({ socket });
+
+      return SocketConnection.__instance;
+    } catch (error) {
+      logger.error(error);
+
+      throw error;
+    }
+  };
+
+  constructor(data: { socket: WebSocket }) {
     super();
 
-    this._socket = new WebSocket(ENDPOINT);
+    this._socket = data.socket;
 
     this._socket.onopen = (ev: Event) => {
       logger.info({ ev }, 'Socket connection opened');
@@ -63,7 +87,7 @@ class SocketConnection extends EnhancedEventEmitter<SocketConnectionEvents> {
     this._socket.onerror = (ev: Event) => {
       logger.info({ ev }, 'Socket connection error');
 
-      this.emit('error', { ws: this._socket });
+      this.emit('connect-error', { ws: this._socket });
 
       this.connectionState = 'CLOSED';
     };

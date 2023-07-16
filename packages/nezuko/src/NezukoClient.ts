@@ -35,8 +35,8 @@ class NezukoClient extends EnhancedEventEmitter<NezukoClientEvents> {
     return socket.connectionState;
   }
 
-  public connect = async () => {
-    const socket = new SocketConnection();
+  public connect = () => {
+    const socket = SocketConnection.init();
 
     this.socket = socket;
 

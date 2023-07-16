@@ -8,10 +8,10 @@ import ConnectionState from "~/components/ConnectionState";
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <React.Fragment>
-      <main>
+      <main className="min-h-screen">
         <Component {...pageProps} />
         <ConnectionState />
-        <Toaster />
+        <Toaster key="toaster" />
       </main>
     </React.Fragment>
   );
