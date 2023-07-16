@@ -6,12 +6,19 @@ import { mainLogger } from './logger';
 
 const logger = mainLogger.createSubLogger('SocketServer.ts');
 
-export type SocketServerEvents = {
-  open: [data: { ws: uWs.WebSocket }];
-  close: [data: { ws: uWs.WebSocket; code: number; message: ArrayBuffer }];
+export type UserData = {
+  id: string;
+  token: string;
 };
 
-export type SocketType = uWs.WebSocket & { id: string };
+export type uWebSocket<T = UserData> = uWs.WebSocket<T>;
+
+export type SocketServerEvents = {
+  open: [data: { ws: uWebSocket }];
+  close: [data: { ws: uWebSocket; code: number; message: ArrayBuffer }];
+};
+
+export type SocketType = uWebSocket & { id: string };
 
 class SocketServer {
   public observer: EnhancedEventEmitter<SocketServerEvents> = new EnhancedEventEmitter<SocketServerEvents>();
@@ -31,38 +38,50 @@ class SocketServer {
       compression: uWs.SHARED_COMPRESSOR,
       maxPayloadLength: 16 * 1024 * 1024,
       idleTimeout: 60,
-      open: async (ws: uWs.WebSocket) => {
+      open: async (ws: uWebSocket) => {
+        const socketId = uuid();
         const socket: SocketType = {
           ...ws,
-          id: uuid(),
+          id: socketId,
         };
 
-        this.#sockets.set(ws.id, socket);
+        const userData: UserData = ws.getUserData();
+
+        logger.info({ userData }, 'New socket connection');
+
+        this.#sockets.set(socketId, socket);
 
         this.observer.emit('open', { ws: socket });
       },
-      close: async (ws: uWs.WebSocket, code: number, message: ArrayBuffer) => {
-        const socket = this.getSocket(ws.id);
+      close: async (ws: uWebSocket, code: number, message: ArrayBuffer) => {
+        const userData = ws.getUserData();
+        const socket = this.getSocket(userData.id);
 
         this.#sockets.delete(socket.id);
 
         this.observer.emit('close', { ws, code, message });
       },
 
-      ping: async (ws: uWs.WebSocket) => {
-        logger.info(`Ping from ${ws.id}`);
+      ping: async (ws: uWebSocket) => {
+        const userData = ws.getUserData();
+        logger.info(`Ping from ${userData.id}`);
       },
 
-      pong: async (ws: uWs.WebSocket) => {
-        logger.info(`Pong from ${ws.id}`);
+      pong: async (ws: uWebSocket) => {
+        const userData = ws.getUserData();
+
+        logger.info(`Pong from ${userData.id}`);
       },
 
-      drain: async (ws: uWs.WebSocket) => {
-        logger.info(`Drain from ${ws.id}`);
+      drain: async (ws: uWebSocket) => {
+        const userData = ws.getUserData();
+        logger.info(`Drain from ${userData.id}`);
       },
 
-      message: async (ws: uWs.WebSocket, message: ArrayBuffer, isBinary: boolean) => {
-        logger.info(`Message from ${ws.id}`);
+      message: async (ws: uWebSocket, message: ArrayBuffer, isBinary: boolean) => {
+        const userData = ws.getUserData();
+
+        logger.info(`Message from ${userData.id}`);
         logger.info(message);
         logger.info(isBinary);
       },

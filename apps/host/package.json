@@ -13,9 +13,11 @@
   "license": "ISC",
   "dependencies": {
     "common-js": "workspace:*",
+    "dotenv": "^16.3.1",
     "logger": "workspace:*",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.31.0",
-    "uuidv4": "^6.2.13"
+    "uuidv4": "^6.2.13",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/uuidv4": "^5.0.0",
