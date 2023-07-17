@@ -35,8 +35,8 @@ class NezukoClient extends EnhancedEventEmitter<NezukoClientEvents> {
     return socket.connectionState;
   }
 
-  public connect = () => {
-    const socket = SocketConnection.init();
+  public connect = (token: string) => {
+    const socket = SocketConnection.init(token);
 
     this.socket = socket;
 
@@ -61,6 +61,15 @@ class NezukoClient extends EnhancedEventEmitter<NezukoClientEvents> {
         ws,
         state,
       });
+    });
+  };
+
+  close = () => {
+    if (!this.socket) return;
+
+    this.socket.close({
+      code: 1000,
+      reason: 'Client closed',
     });
   };
 }

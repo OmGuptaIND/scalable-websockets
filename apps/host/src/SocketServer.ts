@@ -1,5 +1,5 @@
 import uWs from 'uWebSockets.js';
-import { uuid } from 'uuidv4';
+import { nanoid } from 'nanoid';
 
 import { EnhancedEventEmitter } from 'common-js';
 import { mainLogger } from './logger';
@@ -7,8 +7,9 @@ import { mainLogger } from './logger';
 const logger = mainLogger.createSubLogger('SocketServer.ts');
 
 export type UserData = {
-  id: string;
+  socketId: string;
   token: string;
+  timeStamp: string;
 };
 
 export type uWebSocket<T = UserData> = uWs.WebSocket<T>;
@@ -18,12 +19,10 @@ export type SocketServerEvents = {
   close: [data: { ws: uWebSocket; code: number; message: ArrayBuffer }];
 };
 
-export type SocketType = uWebSocket & { id: string };
-
 class SocketServer {
   public observer: EnhancedEventEmitter<SocketServerEvents> = new EnhancedEventEmitter<SocketServerEvents>();
   #uws: uWs.TemplatedApp;
-  #sockets: Map<string, SocketType> = new Map();
+  #sockets: Map<string, uWs.WebSocket<UserData>> = new Map();
 
   public getSocket(id: string) {
     const socket = this.#sockets.get(id);
@@ -34,70 +33,85 @@ class SocketServer {
   }
 
   constructor() {
-    this.#uws = uWs.App().ws('/ws', {
+    this.#uws = uWs.App().ws<UserData>('/ws', {
       compression: uWs.SHARED_COMPRESSOR,
       maxPayloadLength: 16 * 1024 * 1024,
       idleTimeout: 60,
-      open: async (ws: uWebSocket) => {
-        try {
-          const socketId = uuid();
-          const socket: SocketType = {
-            ...ws,
-            id: socketId,
-          };
 
-          const userData: UserData = ws.getUserData();
-
-          logger.info({ userData }, 'New socket connection');
-
-          this.#sockets.set(socketId, socket);
-
-          this.observer.emit('open', { ws: socket });
-        } catch (error) {
-          logger.error('Error Opening Socket');
-          logger.error(error);
-        }
-      },
       upgrade: async (res: uWs.HttpResponse, req: uWs.HttpRequest, context: uWs.us_socket_context_t) => {
         try {
           logger.info('Upgrading Socket');
 
-          logger.info({ req, res, context });
+          const query = req.getQuery();
+
+          logger.info({ query });
+
+          const upgradeAborted = { aborted: false };
+
+          const payload = {
+            ur: req.getUrl(),
+            uh: req.getHeader('host'),
+            uo: req.getHeader('origin'),
+            ue: req.getHeader('sec-websocket-extensions'),
+            us: req.getHeader('sec-websocket-protocol'),
+            uv: req.getHeader('sec-websocket-version'),
+            socketId: nanoid(),
+            timeStamp: new Date().getTime(),
+            token: new Date().getTime().toString(),
+          };
+
+          const secWebSocketKey = req.getHeader('sec-websocket-key');
+          const secWebSocketProtocol = req.getHeader('sec-websocket-protocol');
+          const secWebSocketExtensions = req.getHeader('sec-websocket-extensions');
 
           res.onAborted(() => {
-            res.aborted = true;
+            logger.info('Upgrade Aborted');
+            upgradeAborted.aborted = true;
           });
 
-          res.writeStatus('101 Switching Protocols').writeHeader('test-header', 'header-value');
+          res.cork(() => {
+            if (!upgradeAborted.aborted) {
+              logger.info('Upgrade Aborted, OK');
+              res.writeStatus('101 Switching Protocols').writeHeader('test-header', 'header-value');
+              res.upgrade(payload, secWebSocketKey, secWebSocketProtocol, secWebSocketExtensions, context);
+            }
 
-          res.upgrade(
-            {
-              url: req.getUrl(),
-            },
-            req.getHeader('sec-websocket-key'),
-            req.getHeader('sec-websocket-protocol'),
-            req.getHeader('sec-websocket-extensions'),
-            context
-          );
-
-          if (!res.aborted) {
-            logger.info('Connection Upgraded');
-            res.cork(() => {
-              res.end('Connection Upgraded', false);
-            });
-          }
+            if (upgradeAborted.aborted) {
+              logger.info('Upgrade Aborted, Not OK');
+              res.writeStatus('400 Bad Request').end('Bad Request', true);
+            }
+          });
         } catch (error) {
           logger.error('Error Upgrading Socket: ', { req: req, res: res, context: context });
           logger.error(error);
         }
       },
 
+      open: async (ws: uWebSocket) => {
+        try {
+          const userData: UserData = ws.getUserData();
+
+          logger.info({ userData }, 'New socket connection');
+
+          const socketId = userData.socketId;
+
+          this.#sockets.set(socketId, ws);
+
+          this.observer.emit('open', { ws: ws });
+        } catch (error) {
+          logger.error('Error Opening Socket');
+          logger.error(error);
+        }
+      },
       close: async (ws: uWebSocket, code: number, message: ArrayBuffer) => {
         try {
           const userData = ws.getUserData();
-          const socket = this.getSocket(userData.id);
+          const socket = this.getSocket(userData.socketId);
 
-          this.#sockets.delete(socket.id);
+          logger.info(`Close from ${userData.socketId}`);
+          logger.info({ sc: socket });
+
+          this.#sockets.delete(userData.socketId);
 
           this.observer.emit('close', { ws, code, message });
         } catch (error) {
@@ -109,7 +123,7 @@ class SocketServer {
       ping: async (ws: uWebSocket) => {
         try {
           const userData = ws.getUserData();
-          logger.info(`Ping from ${userData.id}`);
+          logger.info(`Ping from ${userData.socketId}`);
         } catch (error) {
           logger.error('Error Ping Socket');
           logger.error(error);
@@ -118,9 +132,7 @@ class SocketServer {
 
       pong: async (ws: uWebSocket) => {
         try {
-          const userData = ws.getUserData();
-
-          logger.info(`Pong from ${userData.id}`);
+          logger.info({ ws }, 'Pong Socket');
         } catch (error) {
           logger.error('Error Pong Socket');
           logger.error(error);
@@ -130,7 +142,7 @@ class SocketServer {
       drain: async (ws: uWebSocket) => {
         try {
           const userData = ws.getUserData();
-          logger.info(`Drain from ${userData.id}`);
+          logger.info(`Drain from ${userData.socketId}`);
         } catch (error) {
           logger.error('Error Drain Socket');
           logger.error(error);
@@ -141,7 +153,7 @@ class SocketServer {
         try {
           const userData = ws.getUserData();
 
-          logger.info(`Message from ${userData.id}`);
+          logger.info(`Message from ${userData.socketId}`);
           logger.info(message);
           logger.info(isBinary);
         } catch (error) {

@@ -10,13 +10,13 @@ const main = async () => {
 
   ws.observer.on('open', ({ ws }) => {
     const userData = ws.getUserData();
-    logger.info(`New connection: ${userData.id}`);
+    logger.info(`New connection: ${userData.socketId}`);
   });
 
   ws.observer.on('close', ({ ws, code, message }) => {
     const userData = ws.getUserData();
 
-    logger.info(`Connection closed: ${userData.id} (${code})`);
+    logger.info(`Connection closed: ${userData.socketId} (${code})`);
     logger.info(message);
   });
 };

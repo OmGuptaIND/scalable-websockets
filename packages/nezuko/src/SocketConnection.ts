@@ -55,11 +55,11 @@ class SocketConnection extends EnhancedEventEmitter<SocketConnectionEvents> {
     return state;
   }
 
-  public static init = () => {
+  public static init = (token: string) => {
     if (SocketConnection.__instance) return SocketConnection.__instance;
 
     try {
-      const socket = new WebSocket(ENDPOINT);
+      const socket = new WebSocket(`${ENDPOINT}?token=${token}`);
 
       SocketConnection.__instance = new SocketConnection({ socket });
 
@@ -117,6 +117,10 @@ class SocketConnection extends EnhancedEventEmitter<SocketConnectionEvents> {
       }
     };
   }
+
+  close = (data: { code?: number; reason?: string }) => {
+    this._socket.close(data.code, data.reason);
+  };
 }
 
 export default SocketConnection;
