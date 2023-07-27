@@ -1,0 +1,30 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "NODE_ENV=development ts-node-dev --exit-child --respawn --transpile-only src/server.ts",
+    "watch": "tsc -w",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@grpc/proto-loader": "^0.7.8",
+    "dotenv": "^16.3.1",
+    "google-protobuf": "^3.21.2",
+    "grpc": "^1.24.11",
+    "logger": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/google-protobuf": "^3.15.6",
+    "@types/node": "^18.16.0",
+    "grpc-tools": "^1.12.4",
+    "grpc_tools_node_protoc_ts": "^5.3.3",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig": "workspace:*"
+  }
+}
