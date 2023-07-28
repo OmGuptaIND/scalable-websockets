@@ -37,3 +37,4 @@ for f in ./src/proto/*.proto; do
       "$f"
 
 done
+
