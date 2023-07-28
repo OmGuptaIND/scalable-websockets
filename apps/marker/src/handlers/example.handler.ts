@@ -41,8 +41,6 @@ class Handler {
     sayHello: (call: grpc.ServerUnaryCall<ExampleMessage, ServerMessage>, callback: grpc.sendUnaryData<ServerMessage>): void => {
       logger.info(`Received message: ${call}`);
 
-      logger.info({ x: call.request });
-
       const map = call.metadata.getMap();
 
       logger.info({ map });
