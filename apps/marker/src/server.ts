@@ -1,4 +1,5 @@
-import exampleHandler from './handlers/exampleH';
+import exampleHandler from './handlers/example.handler';
+import greeterHandler from './handlers/greeter.handler';
 import mainLogger from './utils/logger';
 
 import * as grpc from '@grpc/grpc-js';
@@ -12,9 +13,8 @@ const main = async () => {
 
   const server: grpc.Server = new grpc.Server();
 
-  server.addService(exampleHandler.portoType.ExamplePackage.Example.service, {
-    sayHello: exampleHandler.handler.sayHello,
-  });
+  server.addService(exampleHandler.service, exampleHandler.handler);
+  server.addService(greeterHandler.service, greeterHandler.handler);
 
   server.bindAsync(PORT, grpc.ServerCredentials.createInsecure(), (err: Error | null, port: number) => {
     if (err !== null) {
