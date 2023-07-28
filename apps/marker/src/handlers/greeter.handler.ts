@@ -43,6 +43,10 @@ class Handler {
 
       logger.info({ x: call.request });
 
+      const map = call.metadata.getMap();
+
+      logger.info({ map });
+
       if (call.request) {
         const reply: ServerMessage = {
           message: `Server Send Back ${call.request.greet}`,
