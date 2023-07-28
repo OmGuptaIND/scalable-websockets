@@ -1,0 +1,27 @@
+{
+  "name": "whiteboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "NODE_ENV=development ts-node-dev --exit-child --respawn --transpile-only src/server.ts",
+    "build:protoo": "proto-loader-gen-types --longs=String --enums=String --defaults  --oneofs --grpcLib=@grpc/grpc-js -O=proto/ proto/*.proto",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.8.20",
+    "@grpc/proto-loader": "^0.7.8",
+    "dotenv": "^16.3.1",
+    "ts-node-dev": "^2.0.0",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.0",
+    "logger": "workspace:*",
+    "tsconfig": "workspace:*",
+    "typescript": "^5.1.6"
+  }
+}
