@@ -22,8 +22,6 @@ for f in ./src/proto/*.proto; do
   if [ "$(basename "$f")" == "index.ts" ]; then
       continue
   fi
-  
-  echo "Compiling ${f}..."
 
   # loop over all the available proto files and compile them into respective dir
   # JavaScript code generating

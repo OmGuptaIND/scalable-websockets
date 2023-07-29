@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package SushiToMomoPackage;
+
+import "./common/rtp_capabilities.proto";
+
+service SushiToMomoService {
+  rpc requestJoinRoom (JoinRoomRequest) returns (JoinRoomResponse) {}
+}
+
+message JoinRoomRequest {
+  string room_id = 1;
+}
+
+message JoinRoomResponse {
+    string roomId = 1;
+    string peerId = 2;
+    RtpCapabilities rtpCapabilities = 3;
+}

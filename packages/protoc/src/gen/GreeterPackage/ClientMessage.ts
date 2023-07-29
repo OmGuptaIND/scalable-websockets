@@ -1,10 +1,10 @@
 // Original file: src/proto/greeter.proto
 
 
-export interface GreetRequest {
+export interface ClientMessage {
   'greet'?: (string);
 }
 
-export interface GreetRequest__Output {
+export interface ClientMessage__Output {
   'greet': (string);
 }

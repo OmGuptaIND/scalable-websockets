@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+message RtpCodecCapability {
+    enum MediaKind {
+        AUDIO = 0;
+        VIDEO = 1;
+    }
+
+    message RtcpFeedback {
+        string type = 1;
+        int32 parameter = 2;
+    }
+
+    MediaKind kind = 1;
+    string mimeType = 2;
+    int32 preferredPayloadType = 3;
+    int32 clockRate = 4;
+    int32 channels = 5;
+    map<string, string> parameters = 6;
+    repeated RtcpFeedback rtcpFeedback = 7;
+}
+
+message RtpHeaderExtension {
+    enum MediaKind {
+        AUDIO = 0;
+        VIDEO = 1;
+    }
+
+    enum RtpHeaderExtensionDirection {
+        SENDRECV = 0;
+        SENDONLY = 1;
+        RECVONLY = 2;
+        INACTIVE = 3;
+    }
+
+    MediaKind kind = 1;
+    string uri = 2;
+    int32 preferredId = 3;
+    bool preferredEncrypt = 4;
+    RtpHeaderExtensionDirection direction = 5;
+}
+
+
+message RtpCapabilities {
+    repeated RtpCodecCapability codecs = 1;
+    repeated RtpHeaderExtension headerExtensions = 2;
+}

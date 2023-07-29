@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package ExamplePackage;
+
+message ServerMessage {
+  string name = 1;
+}
+
+message ClientMessage {
+  string message = 1;
+}
+
+service Example {
+  rpc sayHello(ClientMessage) returns (ServerMessage) {}
+}
