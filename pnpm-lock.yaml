@@ -132,6 +132,40 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6
 
+  apps/watch:
+    dependencies:
+      '@grpc/grpc-js':
+        specifier: ^1.8.20
+        version: 1.8.20
+      '@grpc/proto-loader':
+        specifier: ^0.7.8
+        version: 0.7.8
+      dotenv:
+        specifier: ^16.3.1
+        version: 16.3.1
+      protoc:
+        specifier: workspace:*
+        version: link:../../packages/protoc
+      ts-node-dev:
+        specifier: ^2.0.0
+        version: 2.0.0(@types/node@18.16.0)(typescript@5.1.6)
+      zod:
+        specifier: ^3.21.4
+        version: 3.21.4
+    devDependencies:
+      '@types/node':
+        specifier: ^18.16.0
+        version: 18.16.0
+      logger:
+        specifier: workspace:*
+        version: link:../../packages/logger
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+      typescript:
+        specifier: ^5.1.6
+        version: 5.1.6
+
   apps/web:
     dependencies:
       '@radix-ui/react-icons':

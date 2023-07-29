@@ -2,8 +2,12 @@
   "name": "protoc",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
   "scripts": {
+    "build": "pnpm run build:proto && tsc && pnpm copy:proto",
+    "copy:proto": "cp -r ./src/proto ./dist/proto",
     "build:proto": "rm -rf ./src/gen/* && chmod +x ./src/scripts/protoc.sh && ./src/scripts/protoc.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
